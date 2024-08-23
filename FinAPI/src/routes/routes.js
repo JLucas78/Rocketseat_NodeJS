@@ -1,45 +1,48 @@
 import { Router } from "express";
-import { v4 as uuidv4 } from "uuid";
-import customers from "../db.js";
+import {
+  createAccount,
+  getBalance,
+  getCustomers,
+  deposit,
+  withdraw,
+  getStatement,
+  getStatementForDate,
+  updateAccount,
+  getCustomerForId,
+  deleteAccount
+} from "../controllers/controller.js";
 
 const routes = Router();
 
 // Rota para criar uma conta
-routes.post("/account", (req, res) => {
-    const { cpf, name } = req.body;
-
-    const customerAlreadyExists = customers.some((customer) => customer.cpf === cpf);
-
-    if (customerAlreadyExists) {
-        return res.status(400).json({ error: "Customer already exists!" });
-    }
-
-    customers.push({
-        id: uuidv4(),
-        name,
-        cpf,
-        statement: []
-    });
-
-    return res.status(201).send("Usuário criado com sucesso!");
-});
+routes.post("/account", createAccount);
 
 // Rota para listar todos os usuários
-routes.get("/users", (req, res) => {
-    return res.json(customers);
-});
+routes.get("/users", getCustomers);
 
 // Rota para obter o extrato de um cliente
-routes.get("/statement/", (req, res) => {
-    const { cpf } = req.headers;
+routes.get("/statement", getStatement); 
 
-    const customer = customers.find((customer) => customer.cpf === cpf);
+// Rota para obter o extrato de um cliente
+routes.get("/statement/date", getStatementForDate); 
 
-    if (!customer) {
-        return res.status(404).json({ error: "Customer not found!" });
-    }
+// Rota para fazer um depósito
+routes.post("/deposit", deposit);
 
-    return res.json(customer.statement);
-});
+// Rota para fazer um saque
+routes.post("/withdraw", withdraw);
+
+// Rota para obter o saldo de um cliente
+routes.get("/balance", getBalance); 
+
+// Rota para atualizar os dados de um cliente
+routes.put("/account/:id", updateAccount);
+
+// Rota para obter os dados de um cliente especificado
+routes.get("/account/:id", getCustomerForId);
+
+// Rota para deletar uma conta
+routes.delete("/account/:id" , deleteAccount);
+ 
 
 export default routes;
